@@ -13,20 +13,28 @@ def transform_image():
         # Get the image to be transformed
         image = Image.open(request.files['image'])
 
-        # Perform the transform
-        if TRANSFORM == 'rotate':
-            image = image.rotate(180)
-        elif TRANSFORM == 'thumbnail':
-            iamge = image.thumbnail((64, 64))
-        elif TRANSFORM == 'compress':
-            image = image
-        elif TRANSFORM == 'blur':
-            image = image.filter(ImageFilter.GaussianBlur(10))
+        # Parse the query string
+        try:
+            for key, value in request.args.items():
+                if type(value) == str:
+                    value = float(value)
+                # Perform the transform
+                if key == 'rotate':
+                    image = image.rotate(value)
+                elif TRANSFORM == 'thumb':
+                    iamge = image.thumbnail((value, value))
+                elif TRANSFORM == 'compress':
+                    image = image
+                elif TRANSFORM == 'blur':
+                    image = image.filter(ImageFilter.GaussianBlur(value))
+        except:
+            return jsonify({'error': 'Could not parse filter list: {}'.format(key)}), 400
 
         # Return the transformed image from memory
         mem_file = BytesIO()
         image.save(mem_file, "JPEG")
-        return mem_file.getvalue(), 200, [('Content-Type', 'image/jpeg')]
+        mem_file.seek(0)
+        return send_file(mem_file, attachment_filename='_.jpg')
 
 @app.route("/transform/healthcheck")
 def healthcheck():
