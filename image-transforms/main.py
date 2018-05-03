@@ -28,6 +28,9 @@ def transform_image():
         image.save(mem_file, "JPEG")
         return mem_file.getvalue(), 200, [('Content-Type', 'image/jpeg')]
 
+@app.route("/transform/healthcheck")
+def healthcheck():
+    return jsonify({'service': 'image-transform', 'status': 'okay'}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
