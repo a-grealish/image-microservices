@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  image-storage:
+    build: ./image-storage
+    container_name: image-storage
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=dev
+    volumes:
+      - "./image-storage:/code"
+  image-transforms:
+    build: ./image-transforms
+    container_name: image-transforms
+    ports:
+      - "5001:5000"
+    volumes:
+      - "./image-transforms:/code"
+  nginx:
+    build: ./nginx
+    container_name: nginx-proxy
+    ports:
+      - "8080:8080"
