@@ -25,7 +25,11 @@ def upload_image():
     if request.method == 'POST':
         image_id = uuid.uuid4().hex
 
-        filename = images.save(request.files['image'], name=image_id+'.')
+        try:
+            filename = images.save(request.files['image'], name=image_id+'.')
+        except:
+            return jsonify({'error': 'No image found with the \'image\' key'}), 400
+        
         _, image_ext = os.path.splitext(filename)
 
         # Add the metadata entry to the db

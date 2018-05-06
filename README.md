@@ -4,8 +4,9 @@ A set of microservices to store, host and manipulate image files using a rest ap
 ## Architecture
 Services:
 1. image-storage - Stores uploaded images and serves them back to the consumer
-2. image-transform - Takes a uploaded image, url or image_id for above service and transforms the iamge according to the passed parameters
-3. nginx - An API layer which fronts all other microservices
+2. image-storage-db - A postgres container to store image metadata
+3. image-transform - Takes a uploaded image, url or image_id for above service and transforms the iamge according to the passed parameters
+4. nginx - An API layer which fronts all other microservices
 
 Each service is contained within it's own docker container and can be built with the Dockerfiles. The full service can be builts and run with the docker-compose.yml file.
 
@@ -36,7 +37,6 @@ To start the microservices with a production web server (gunicorn) change the FL
 
 
 ## To Improve
-- Convert Postman test suite to automated test suite
 - Investigate if some image type converstions or transformations are common enough to justify pre-computing
 - Decide if we need user access managment or are all images open to anyone?
 - Add API versioning to endpoints using nginx
