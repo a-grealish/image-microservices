@@ -5,47 +5,25 @@ import uuid
 BASE_URL = "http://127.0.0.1:8080"
 
 class TestImageUpload(unittest.TestCase):
-    def setUp(self):
-        self.url = BASE_URL+"/images"        
-
-    def tearDown(self):
-        pass
-
     def test_normal_upload(self):
-
-        payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"image\"; filename=\".\\test_image.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--"
-    
-        headers = {
-            'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
-            'Cache-Control': "no-cache"
-        }
-
-        r = requests.request("POST", self.url, data=payload, headers=headers)
+        files = {'image': open('test_image.jpg', 'rb')}
+        
+        r = requests.request("POST", BASE_URL+'/images', files=files)
 
         assert(r.status_code == 201)
 
     def test_bad_image_key(self):
-        payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"bad_image_key\"; filename=\".\\test_image.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--"
+        files = {'bad_image_key': open('test_image.jpg', 'rb')}
 
-        headers = {
-            'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
-            'Cache-Control': "no-cache"
-        }
-
-        r = requests.request("POST", self.url, data=payload, headers=headers)
+        r = requests.request("POST", BASE_URL+'/images', files=files)
 
         assert(r.status_code == 400)
 
 class TestImageDownload(unittest.TestCase):
     def setUp(self):
-        payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"image\"; filename=\".\\test_image.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--"
-
-        headers = {
-            'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
-            'Cache-Control': "no-cache"
-        }
-
-        r = requests.request("POST", BASE_URL+'/images', data=payload, headers=headers)
+        files = {'image': open('test_image.jpg', 'rb')}
+        
+        r = requests.request("POST", BASE_URL+'/images', files=files)
 
         self.image_id = r.json()['image_id']
 
@@ -66,21 +44,23 @@ class TestImageDownload(unittest.TestCase):
 
 class TestImageConversion(unittest.TestCase):
     def setUp(self):
-        payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"image\"; filename=\".\\test_image.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--"
-
-        headers = {
-            'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
-            'Cache-Control': "no-cache"
-        }
-
-        r = requests.request("POST", BASE_URL+'/images', data=payload, headers=headers)
+        files = {'image': open('test_image.jpg', 'rb')}
+        
+        r = requests.request("POST", BASE_URL+'/images', files=files)
 
         self.image_id = r.json()['image_id']
 
-    def test_gif_conversion(self):
-        r = requests.get(BASE_URL+'/images/'+self.image_id+'.gif')
+    def test_png_conversion(self):
+        url = BASE_URL+'/images/'+self.image_id+'.png'
 
-        print(r.status_code)
+        r = requests.get(url)
+
+        assert(r.status_code == 200)
+
+    def test_gif_conversion(self):
+        url = BASE_URL+'/images/'+self.image_id+'.gif'
+
+        r = requests.get(url)
 
         assert(r.status_code == 200)
 
