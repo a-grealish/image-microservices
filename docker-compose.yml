@@ -6,8 +6,15 @@ services:
     container_name: image-storage
     environment:
       - FLASK_ENV=dev
+      - DATABASE_URI=postgresql://postgres:developpassword@image-storage-db/postgres
+    depends_on:
+      - image-storage-db
     volumes:
       - "./image-storage:/code"
+  image-storage-db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=developpassword
   image-transforms:
     build: ./image-transforms
     container_name: image-transforms

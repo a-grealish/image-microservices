@@ -38,7 +38,6 @@ To start the microservices with a production web server (gunicorn) change the FL
 ## To Improve
 - Convert Postman test suite to automated test suite
 - Investigate if some image type converstions or transformations are common enough to justify pre-computing
-- Add persistent storage for the image metadata
 - Decide if we need user access managment or are all images open to anyone?
 - Add API versioning to endpoints using nginx
 - Add varnish cache in front of the API to improve the image transforming service if the same request is made multiple times
