@@ -4,16 +4,17 @@ from io import BytesIO
 
 app = Flask(__name__)
 
-TRANSFORM = 'blur'
-
 @app.route("/transform", methods=['POST'])
 def transform_image():
     if request.method == 'POST':
 
-        # Get the image to be transformed
+        # Get the image to be transformed, this can be any of the following:
+        # - image uploaded as a file
+        # - url of a publicaly accessible image
+        # - the image_id of an iamge stored in the image_storage microservice
         image = Image.open(request.files['image'])
 
-        # Parse the query string
+        # Parse the query string and apply the transformation
         try:
             for key, value in request.args.items():
                 if type(value) == str:

@@ -32,7 +32,7 @@ And example is ```/trasnform?rotate=90&blur=10```
 3. If the code for the two python microservices changes the service will reload
 
 ## Deployment
-- TODO create a docker compose file which uses a production server such as gunicorn.
+To start the microservices with a production web server (gunicorn) change the FLASK_ENV to 'prod' in the docker-compose file
 
 
 ## To Improve

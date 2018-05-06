@@ -7,4 +7,4 @@ RUN pip install pipenv
 RUN pipenv install --system
 
 ENTRYPOINT ["python"]
-CMD ["main.py"]
+CMD ["run.py"]

@@ -11,6 +11,8 @@ services:
   image-transforms:
     build: ./image-transforms
     container_name: image-transforms
+    environment:
+      - FLASK_ENV=dev
     volumes:
       - "./image-transforms:/code"
   nginx:
