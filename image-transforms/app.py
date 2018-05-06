@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_file
 from PIL import Image, ImageFilter
 from io import BytesIO
+import urllib
 
 app = Flask(__name__)
 
@@ -12,21 +13,41 @@ def transform_image():
         # - image uploaded as a file
         # - url of a publicaly accessible image
         # - the image_id of an iamge stored in the image_storage microservice
-        image = Image.open(request.files['image'])
+        image = None
+
+        url = request.form.get('url')
+        if url is not None:
+            file = BytesIO(urllib.request.urlopen(url).read())
+            image = Image.open(file)
+
+        image_file = request.files.get('image')
+        if image_file is not None:
+            image = Image.open(request.files['image'])
+
+        image_id = request.form.get('image_id')
+        if image_id is not None:
+            file = BytesIO(urllib.request.urlopen('http://image-storage:5000/images/'+image_id).read())
+            image = Image.open(file)
+
+        if image is None:
+            return jsonify({'error': 'Could not find an image to transform'}), 400
 
         # Parse the query string and apply the transformation
         try:
-            for key, value in request.args.items():
-                if type(value) == str:
-                    value = float(value)
+            for command in request.query_string.split(b'&'):
+                # Split the command in a key and value
+                command_list = command.split(b'=')
+                key = command_list[0]
+                value = float(command_list[1])
+
                 # Perform the transform
-                if key == 'rotate':
-                    image = image.rotate(value)
-                elif TRANSFORM == 'thumb':
+                if key == b'rotate':
+                    image = image.rotate(value, expand=True)
+                elif key == b'thumb':
                     iamge = image.thumbnail((value, value))
-                elif TRANSFORM == 'compress':
+                elif key == b'compress':
                     image = image
-                elif TRANSFORM == 'blur':
+                elif key == b'blur':
                     image = image.filter(ImageFilter.GaussianBlur(value))
         except:
             return jsonify({'error': 'Could not parse filter list: {}'.format(key)}), 400
