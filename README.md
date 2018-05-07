@@ -23,6 +23,7 @@ Query String can contain a chained set of transformation from the following list
 - rotate={degrees}
 - thumb={height_and_width}
 - blur={radius_pixels}
+- compress={0-100 where 100 is maximum quality}
 
 And example is ```/trasnform?rotate=90&blur=10```
 
@@ -41,4 +42,3 @@ To start the microservices with a production web server (gunicorn) change the FL
 - Decide if we need user access managment or are all images open to anyone?
 - Add API versioning to endpoints using nginx
 - Add varnish cache in front of the API to improve the image transforming service if the same request is made multiple times
-- Finish implementation of transforms

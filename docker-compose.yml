@@ -27,3 +27,6 @@ services:
     container_name: nginx-proxy
     ports:
       - "8080:8080"
+    depends_on:
+      - image-storage
+      - image-transforms

@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_file
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.utils import secure_filename
 from PIL import Image
 from io import BytesIO
 import uuid, os
@@ -19,17 +20,32 @@ from models import ImageMetadata
 app.config['UPLOADS_DEFAULT_DEST'] = './'
 images = UploadSet('images', IMAGES)
 configure_uploads(app, images)
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/images", methods=['POST'])
 def upload_image():
     if request.method == 'POST':
+        # Create a uuid to rename the file to
         image_id = uuid.uuid4().hex
 
+        # Check the file is an allowed type and store
         try:
-            filename = images.save(request.files['image'], name=image_id+'.')
+            file = request.files['image']
         except:
             return jsonify({'error': 'No image found with the \'image\' key'}), 400
-        
+
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'This file type is not allowed'}), 400
+
+        try:
+            filename = images.save(file, name=image_id+'.')
+        except:
+            return jsonify({'error': 'Could not store the image'}), 500
+
         _, image_ext = os.path.splitext(filename)
 
         # Add the metadata entry to the db
@@ -45,8 +61,8 @@ def upload_image():
 @app.route("/images/<image_name>", methods=['GET'])
 def single_image(image_name):
 
-    # Get the image_id and extension for the passed name
-    image_id, image_ext = os.path.splitext(image_name)
+    # Get the image_id and extension for the passed name (whilst making filename safe)
+    image_id, image_ext = os.path.splitext(secure_filename(image_name))
 
     # Check that the image_id is a valid uuid
     try:
@@ -64,11 +80,13 @@ def single_image(image_name):
     if image_ext == '':
         image_ext = image_metadata.file_ext
 
+    # Check that the desired file format is an allow one
+    if not allowed_file(image_ext):
+        return jsonify({'error': 'This file type is not allowed'}), 400
 
     # If no file format specified or if the same as original return the file else convert first
     if image_ext == image_metadata.file_ext:
         try:
-            # TODO: Loading a file with user inputed data is unsafe
             path = './images/'+image_id+image_ext
             return send_file(path)
         except:

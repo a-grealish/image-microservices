@@ -5,6 +5,12 @@ import urllib
 
 app = Flask(__name__)
 
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route("/transform", methods=['POST'])
 def transform_image():
     if request.method == 'POST':
@@ -19,10 +25,14 @@ def transform_image():
         url = request.form.get('url')
         if url is not None:
             file = BytesIO(urllib.request.urlopen(url).read())
+            if not allowed_file(url):
+                return jsonify({'error': 'This file type is not allowed'}), 400
             image = Image.open(file)
 
         image_file = request.files.get('image')
         if image_file is not None:
+            if not allowed_file(image_file.filename):
+                return jsonify({'error': 'This file type is not allowed'}), 400
             image = Image.open(request.files['image'])
 
         image_id = request.form.get('image_id')
