@@ -14,6 +14,7 @@ def transform_image():
         # - url of a publicaly accessible image
         # - the image_id of an iamge stored in the image_storage microservice
         image = None
+        quality = 100
 
         url = request.form.get('url')
         if url is not None:
@@ -39,6 +40,8 @@ def transform_image():
                 command_list = command.split(b'=')
                 key = command_list[0]
                 value = float(command_list[1])
+                if key == b'':
+                    continue
 
                 # Perform the transform
                 if key == b'rotate':
@@ -46,7 +49,7 @@ def transform_image():
                 elif key == b'thumb':
                     iamge = image.thumbnail((value, value))
                 elif key == b'compress':
-                    image = image
+                    quality = min(quality, int(value))
                 elif key == b'blur':
                     image = image.filter(ImageFilter.GaussianBlur(value))
         except:
@@ -54,7 +57,7 @@ def transform_image():
 
         # Return the transformed image from memory
         mem_file = BytesIO()
-        image.save(mem_file, "JPEG")
+        image.save(mem_file, "JPEG", quality=quality)
         mem_file.seek(0)
         return send_file(mem_file, attachment_filename='_.jpg')
 
