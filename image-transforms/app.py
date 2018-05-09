@@ -49,9 +49,9 @@ def transform_image():
                 # Split the command in a key and value
                 command_list = command.split(b'=')
                 key = command_list[0]
-                value = float(command_list[1])
                 if key == b'':
                     continue
+                value = float(command_list[1])
 
                 # Perform the transform
                 if key == b'rotate':
